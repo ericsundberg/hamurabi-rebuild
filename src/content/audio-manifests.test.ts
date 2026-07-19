@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { musicManifest } from './music-manifest';
 import { sfxManifest } from './sfx-manifest';
@@ -24,6 +26,19 @@ describe('audio manifests', () => {
   it('routes sfx through the public audio sfx path', () => {
     for (const entry of Object.values(sfxManifest)) {
       expect(entry.path).toMatch(/^\/assets\/audio\/sfx\/.+\.ogg$/);
+    }
+  });
+
+  it('points music manifest entries to existing public assets', () => {
+    for (const entry of Object.values(musicManifest)) {
+      const publicFilePath = join(
+        process.cwd(),
+        'public',
+        entry.path.replace(/^\//, ''),
+      );
+
+      expect(publicFilePath).toContain('/public/assets/audio/music/');
+      expect(existsSync(publicFilePath)).toBe(true);
     }
   });
 

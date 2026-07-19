@@ -1,3 +1,7 @@
+import {
+  createAudioServices,
+  type AudioServices,
+} from '../audio/audio-services';
 import { startBrowserConsoleRunner } from '../headless/browser-console-runner';
 import { renderCreditsScene } from '../scenes/credits-scene';
 import { renderGameSetupScene } from '../scenes/game-setup-scene';
@@ -7,14 +11,17 @@ import { renderTitleScene } from '../scenes/title-scene';
 import { SceneRouter } from './scene-router';
 
 export class AppController {
+  private readonly audioServices: AudioServices;
   private readonly router: SceneRouter;
 
-  public constructor(rootElement: HTMLElement) {
-    this.router = new SceneRouter(rootElement);
+  public constructor(private readonly rootElement: HTMLElement) {
+    this.audioServices = createAudioServices();
+    this.router = new SceneRouter(rootElement, this.audioServices);
     this.registerScenes();
   }
 
   public start(): void {
+    this.audioServices.unlocker.bindToFirstGesture(this.rootElement);
     startBrowserConsoleRunner();
     this.router.navigate('title');
   }

@@ -3,24 +3,24 @@ import type { MusicManifest } from '../audio/types';
 export const musicManifest = {
   'main-menu-theme': {
     id: 'main-menu-theme',
-    label: 'Main Menu Theme',
-    path: '/assets/audio/music/main-menu-theme.ogg',
+    label: 'Ancient Egypt',
+    path: '/assets/audio/music/ancient-egypt.ogg',
     loop: true,
     volume: 0.6,
   },
 
   'yearly-court-theme': {
     id: 'yearly-court-theme',
-    label: 'Yearly Court Theme',
-    path: '/assets/audio/music/yearly-court-theme.ogg',
+    label: 'Another Egyptian Theme',
+    path: '/assets/audio/music/another-egyptian-theme.ogg',
     loop: true,
     volume: 0.55,
   },
 
   'disaster-theme': {
     id: 'disaster-theme',
-    label: 'Disaster Theme',
-    path: '/assets/audio/music/disaster-theme.ogg',
+    label: 'Sand Scar Desert',
+    path: '/assets/audio/music/sand-scar-desert.ogg',
     loop: false,
     volume: 0.75,
   },

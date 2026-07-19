@@ -1,9 +1,15 @@
+export interface MakeElementOptions {
+  readonly className?: string;
+  readonly textContent?: string;
+}
+
+export interface MakeButtonOptions {
+  readonly onBeforeClick?: () => void;
+}
+
 export function makeElement<K extends keyof HTMLElementTagNameMap>(
   tagName: K,
-  options: {
-    className?: string;
-    textContent?: string;
-  } = {},
+  options: MakeElementOptions = {},
 ): HTMLElementTagNameMap[K] {
   const element = document.createElement(tagName);
 
@@ -22,13 +28,17 @@ export function makeButton(
   label: string,
   onClick: () => void,
   className = 'menu-button',
+  options: MakeButtonOptions = {},
 ): HTMLButtonElement {
   const button = document.createElement('button');
 
   button.type = 'button';
   button.className = className;
   button.textContent = label;
-  button.addEventListener('click', onClick);
+  button.addEventListener('click', () => {
+    options.onBeforeClick?.();
+    onClick();
+  });
 
   return button;
 }

@@ -1,3 +1,4 @@
+import type { AudioServices } from '../audio/audio-services';
 import { replaceChildren } from '../ui/dom-helpers';
 
 export type SceneName =
@@ -10,7 +11,8 @@ export type SceneName =
 export type NavigateToScene = (sceneName: SceneName) => void;
 
 export interface SceneContext {
-  navigate: NavigateToScene;
+  readonly navigate: NavigateToScene;
+  readonly audio: AudioServices;
 }
 
 export type SceneRenderer = (context: SceneContext) => HTMLElement;
@@ -18,7 +20,10 @@ export type SceneRenderer = (context: SceneContext) => HTMLElement;
 export class SceneRouter {
   private readonly scenes = new Map<SceneName, SceneRenderer>();
 
-  public constructor(private readonly rootElement: HTMLElement) {}
+  public constructor(
+    private readonly rootElement: HTMLElement,
+    private readonly audioServices: AudioServices,
+  ) {}
 
   public register(sceneName: SceneName, renderer: SceneRenderer): void {
     this.scenes.set(sceneName, renderer);
@@ -33,6 +38,7 @@ export class SceneRouter {
 
     const sceneElement = renderer({
       navigate: (nextSceneName) => this.navigate(nextSceneName),
+      audio: this.audioServices,
     });
 
     replaceChildren(this.rootElement, sceneElement);
