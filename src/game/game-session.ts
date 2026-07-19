@@ -7,6 +7,12 @@ import type {
   TurnOutcome,
 } from '../core/types';
 import { defaultGameConfig } from '../content/default-game-config';
+import {
+  getGameOverState,
+  getGameStatus,
+  type GameOverState,
+  type GameStatus,
+} from './game-status';
 import { createDefaultTurnCommand } from './yearly-command-defaults';
 
 export class GameSession {
@@ -26,6 +32,18 @@ export class GameSession {
     return this.engine !== null;
   }
 
+  public getStatus(): GameStatus {
+    return getGameStatus(this.getState());
+  }
+
+  public isGameOver(): boolean {
+    return this.getStatus() === 'ended';
+  }
+
+  public getGameOverState(): GameOverState | null {
+    return getGameOverState(this.getState());
+  }
+
   public getState(): GameState | null {
     return this.engine?.getState() ?? null;
   }
@@ -41,7 +59,7 @@ export class GameSession {
   public getSuggestedTurnCommand(): TurnCommand | null {
     const state = this.getState();
 
-    if (!state) {
+    if (!state || this.isGameOver()) {
       return null;
     }
 
@@ -49,7 +67,7 @@ export class GameSession {
   }
 
   public processTurn(command: TurnCommand): TurnOutcome | null {
-    if (!this.engine) {
+    if (!this.engine || this.isGameOver()) {
       return null;
     }
 
