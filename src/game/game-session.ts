@@ -7,6 +7,7 @@ import type {
   TurnOutcome,
 } from '../core/types';
 import { defaultGameConfig } from '../content/default-game-config';
+import { createDefaultTurnCommand } from './yearly-command-defaults';
 
 export class GameSession {
   private engine: GameEngine | null = null;
@@ -35,6 +36,16 @@ export class GameSession {
 
   public getLastOutcome(): TurnOutcome | null {
     return this.lastOutcome;
+  }
+
+  public getSuggestedTurnCommand(): TurnCommand | null {
+    const state = this.getState();
+
+    if (!state) {
+      return null;
+    }
+
+    return createDefaultTurnCommand(state, this.config);
   }
 
   public processTurn(command: TurnCommand): TurnOutcome | null {

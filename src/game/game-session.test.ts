@@ -9,6 +9,7 @@ describe('GameSession', () => {
     expect(session.getState()).toBeNull();
     expect(session.getAnnualReport()).toBeNull();
     expect(session.getLastOutcome()).toBeNull();
+    expect(session.getSuggestedTurnCommand()).toBeNull();
   });
 
   it('starts a new game with a normalized player name', () => {
@@ -19,6 +20,19 @@ describe('GameSession', () => {
     expect(session.hasActiveGame()).toBe(true);
     expect(session.getState()?.playerName).toBe('Ada');
     expect(session.getAnnualReport()?.year).toBe(1);
+  });
+
+  it('creates a suggested opening turn command', () => {
+    const session = createGameSession();
+
+    session.startNewGame('Tester');
+
+    expect(session.getSuggestedTurnCommand()).toEqual({
+      acresToBuy: 0,
+      acresToSell: 0,
+      grainToFeed: 2000,
+      acresToPlant: 800,
+    });
   });
 
   it('processes a turn and stores the latest outcome', () => {
