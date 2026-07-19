@@ -4,6 +4,14 @@ import { describe, expect, it } from 'vitest';
 import { musicManifest } from './music-manifest';
 import { sfxManifest } from './sfx-manifest';
 
+function toPublicFilePath(assetPath: string): string {
+  return join(
+    process.cwd(),
+    'public',
+    assetPath.replace(/^\//, ''),
+  );
+}
+
 describe('audio manifests', () => {
   it('uses stable matching music IDs', () => {
     for (const [id, entry] of Object.entries(musicManifest)) {
@@ -31,13 +39,22 @@ describe('audio manifests', () => {
 
   it('points music manifest entries to existing public assets', () => {
     for (const entry of Object.values(musicManifest)) {
-      const publicFilePath = join(
-        process.cwd(),
-        'public',
-        entry.path.replace(/^\//, ''),
-      );
+      const publicFilePath = toPublicFilePath(entry.path);
 
       expect(publicFilePath).toContain('/public/assets/audio/music/');
+      expect(existsSync(publicFilePath)).toBe(true);
+    }
+  });
+
+  it('points implemented title sfx entries to existing public assets', () => {
+    const implementedSfxEntries = [
+      sfxManifest['button-click'],
+    ];
+
+    for (const entry of implementedSfxEntries) {
+      const publicFilePath = toPublicFilePath(entry.path);
+
+      expect(publicFilePath).toContain('/public/assets/audio/sfx/');
       expect(existsSync(publicFilePath)).toBe(true);
     }
   });
