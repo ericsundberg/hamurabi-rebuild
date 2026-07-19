@@ -1,4 +1,4 @@
-import { game_version } from '../version';
+import { runScriptedHeadlessGame } from './scripted-game-runner';
 
 let hasStarted = false;
 
@@ -9,11 +9,16 @@ export function startBrowserConsoleRunner(): void {
 
   hasStarted = true;
 
-  console.groupCollapsed('[headless] startup');
-  console.log('[headless] starting browser console runner');
-  console.log(`[headless] game version ${game_version}`);
-  console.log('[headless] simulation core is not wired yet');
-  console.log('[headless] command: boot');
-  console.log('[headless] command: await-player-input');
+  console.groupCollapsed('[headless] scripted browser run');
+
+  for (const line of runScriptedHeadlessGame()) {
+    if (line.length === 0) {
+      console.log('');
+      continue;
+    }
+
+    console.log(line);
+  }
+
   console.groupEnd();
 }
