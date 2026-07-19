@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { game_version } from '../version';
 import { runScriptedHeadlessGame } from './scripted-game-runner';
 
 describe('runScriptedHeadlessGame', () => {
@@ -6,7 +7,7 @@ describe('runScriptedHeadlessGame', () => {
     const lines = runScriptedHeadlessGame();
 
     expect(lines).toContain('[headless] starting scripted simulation');
-    expect(lines).toContain('[headless] game version 0.0.3-prealpha');
+    expect(lines).toContain(`[headless] game version ${game_version}`);
     expect(lines).toContain('[headless] Year 1 report');
     expect(lines).toContain('[headless] command');
     expect(lines).toContain('[headless] next year: 2');
