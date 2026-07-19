@@ -16,7 +16,7 @@ export function renderGameSetupScene(context: SceneContext): HTMLElement {
 
   const description = makeElement('p', {
     className: 'scene-description',
-    textContent: 'Enter a player name. The full game setup flow will be expanded later.',
+    textContent: 'Enter a player name to begin your first year in court.',
   });
 
   const form = makeElement('form', {
@@ -44,9 +44,12 @@ export function renderGameSetupScene(context: SceneContext): HTMLElement {
 
     const playerName = input.value.trim() || 'Player';
 
-    console.log(`[ui] new game requested for player: ${playerName}`);
-    console.log('[headless] command: new-game');
-    console.log('[headless] game scene is not wired yet');
+    context.audio.sfx.play('button-click');
+    context.game.startNewGame(playerName);
+
+    console.log(`[ui] new game started for player: ${playerName}`);
+
+    context.navigate('yearly-turn');
   });
 
   label.append(input);
@@ -56,7 +59,9 @@ export function renderGameSetupScene(context: SceneContext): HTMLElement {
     title,
     description,
     form,
-    makeButton('Back', () => context.navigate('title'), 'secondary-button'),
+    makeButton('Back', () => context.navigate('title'), 'secondary-button', {
+      onBeforeClick: () => context.audio.sfx.play('button-click'),
+    }),
   );
 
   scene.append(panel);
