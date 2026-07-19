@@ -1,1 +1,1 @@
-export const game_version = '0.0.5-prealpha';
+export const game_version = '0.0.6-prealpha';

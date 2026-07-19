@@ -13,24 +13,60 @@ describe('GameSession', () => {
     expect(session.getAnnualReport()).toBeNull();
     expect(session.getLastOutcome()).toBeNull();
     expect(session.getSuggestedTurnCommand()).toBeNull();
+    expect(session.getRulerProfile()).toBeNull();
+    expect(session.getRulerAge()).toBeNull();
+    expect(session.getGameStartYear()).toBe(1);
   });
 
-  it('starts a new game with a normalized player name', () => {
+  it('starts a new game with a normalized ruler profile', () => {
     const session = createGameSession();
 
-    session.startNewGame('  Ada  ');
+    session.startNewGame({
+      givenName: '  Ada  ',
+      familyName: '  Stone  ',
+      startingAge: 31,
+      gender: 'woman',
+    });
 
     expect(session.hasActiveGame()).toBe(true);
     expect(session.getStatus()).toBe('active');
     expect(session.isGameOver()).toBe(false);
-    expect(session.getState()?.playerName).toBe('Ada');
+    expect(session.getState()?.playerName).toBe('Ada Stone');
+    expect(session.getRulerProfile()).toEqual({
+      givenName: 'Ada',
+      familyName: 'Stone',
+      startingAge: 31,
+      gender: 'woman',
+    });
+    expect(session.getRulerAge()).toBe(31);
     expect(session.getAnnualReport()?.year).toBe(1);
+  });
+
+  it('keeps string startNewGame compatibility for simple callers', () => {
+    const session = createGameSession();
+
+    session.startNewGame('Tester');
+
+    expect(session.hasActiveGame()).toBe(true);
+    expect(session.getState()?.playerName).toBe('Tester House');
+    expect(session.getRulerProfile()).toEqual({
+      givenName: 'Tester',
+      familyName: 'House',
+      startingAge: 25,
+      gender: 'unspecified',
+    });
+    expect(session.getRulerAge()).toBe(25);
   });
 
   it('creates a suggested opening turn command', () => {
     const session = createGameSession();
 
-    session.startNewGame('Tester');
+    session.startNewGame({
+      givenName: 'Tester',
+      familyName: 'House',
+      startingAge: 25,
+      gender: 'unspecified',
+    });
 
     expect(session.getSuggestedTurnCommand()).toEqual({
       acresToBuy: 0,
@@ -43,7 +79,12 @@ describe('GameSession', () => {
   it('processes a turn and stores the latest outcome', () => {
     const session = createGameSession();
 
-    session.startNewGame('Tester');
+    session.startNewGame({
+      givenName: 'Tester',
+      familyName: 'House',
+      startingAge: 25,
+      gender: 'unspecified',
+    });
 
     const outcome = session.processTurn({
       acresToBuy: 0,
@@ -56,12 +97,18 @@ describe('GameSession', () => {
     expect(session.getState()?.year).toBe(2);
     expect(session.getLastOutcome()).toBe(outcome);
     expect(session.getStatus()).toBe('active');
+    expect(session.getRulerAge()).toBe(26);
   });
 
   it('ends the game when population reaches zero', () => {
     const session = createGameSession();
 
-    session.startNewGame('Tester');
+    session.startNewGame({
+      givenName: 'Tester',
+      familyName: 'House',
+      startingAge: 25,
+      gender: 'unspecified',
+    });
 
     const outcome = session.processTurn({
       acresToBuy: 0,
@@ -84,7 +131,12 @@ describe('GameSession', () => {
   it('does not process additional turns after the game ends', () => {
     const session = createGameSession();
 
-    session.startNewGame('Tester');
+    session.startNewGame({
+      givenName: 'Tester',
+      familyName: 'House',
+      startingAge: 25,
+      gender: 'unspecified',
+    });
 
     session.processTurn({
       acresToBuy: 0,
@@ -95,12 +147,14 @@ describe('GameSession', () => {
 
     const stateAfterGameOver = session.getState();
 
-    expect(session.processTurn({
-      acresToBuy: 0,
-      acresToSell: 0,
-      grainToFeed: 0,
-      acresToPlant: 0,
-    })).toBeNull();
+    expect(
+      session.processTurn({
+        acresToBuy: 0,
+        acresToSell: 0,
+        grainToFeed: 0,
+        acresToPlant: 0,
+      }),
+    ).toBeNull();
 
     expect(session.getState()).toEqual(stateAfterGameOver);
   });

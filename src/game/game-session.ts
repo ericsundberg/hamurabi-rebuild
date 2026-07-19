@@ -7,24 +7,35 @@ import type {
   TurnOutcome,
 } from '../core/types';
 import { defaultGameConfig } from '../content/default-game-config';
+import { gameStartYear, getCurrentRulerAge } from './game-calendar';
 import {
   getGameOverState,
   getGameStatus,
   type GameOverState,
   type GameStatus,
 } from './game-status';
+import {
+  createRulerProfile,
+  formatRulerName,
+  type RulerCreationInput,
+  type RulerProfile,
+} from './ruler-profile';
 import { createDefaultTurnCommand } from './yearly-command-defaults';
 
 export class GameSession {
   private engine: GameEngine | null = null;
   private lastOutcome: TurnOutcome | null = null;
+  private rulerProfile: RulerProfile | null = null;
 
   public constructor(private readonly config: GameConfig = defaultGameConfig) {}
 
-  public startNewGame(playerName: string): void {
-    const normalizedPlayerName = playerName.trim() || 'Player';
+  public startNewGame(input: Partial<RulerCreationInput> | string): void {
+    const rulerProfile = typeof input === 'string'
+      ? createRulerProfile({ givenName: input })
+      : createRulerProfile(input);
 
-    this.engine = new GameEngine(this.config, normalizedPlayerName);
+    this.rulerProfile = rulerProfile;
+    this.engine = new GameEngine(this.config, formatRulerName(rulerProfile));
     this.lastOutcome = null;
   }
 
@@ -54,6 +65,24 @@ export class GameSession {
 
   public getLastOutcome(): TurnOutcome | null {
     return this.lastOutcome;
+  }
+
+  public getRulerProfile(): RulerProfile | null {
+    return this.rulerProfile;
+  }
+
+  public getRulerAge(): number | null {
+    const state = this.getState();
+
+    if (!state || !this.rulerProfile) {
+      return null;
+    }
+
+    return getCurrentRulerAge(this.rulerProfile, state);
+  }
+
+  public getGameStartYear(): number {
+    return gameStartYear;
   }
 
   public getSuggestedTurnCommand(): TurnCommand | null {
