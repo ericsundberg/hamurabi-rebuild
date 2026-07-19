@@ -15,8 +15,10 @@ describe('audio managers', () => {
     const sfxManager = new SfxManager();
 
     expect(sfxManager.has('button-click')).toBe(true);
+    expect(sfxManager.has('button-cancel')).toBe(true);
     expect(sfxManager.has('missing-sfx')).toBe(false);
     expect(sfxManager.getIds()).toContain('button-click');
+    expect(sfxManager.getIds()).toContain('button-cancel');
   });
 
   it('does not throw when asked to play a missing sfx id', () => {

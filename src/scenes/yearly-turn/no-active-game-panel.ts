@@ -15,10 +15,10 @@ export function makeNoActiveGamePanel(context: SceneContext): HTMLElement {
       textContent: 'Start a new game before entering yearly commands.',
     }),
     makeButton('New Game', () => context.navigate('game-setup'), 'menu-button', {
-      onBeforeClick: () => context.audio.sfx.play('button-click'),
+    onBeforeClick: () => context.audio.sfx.play('button-click'),
     }),
     makeButton('Back to Title', () => context.navigate('title'), 'secondary-button', {
-      onBeforeClick: () => context.audio.sfx.play('button-click'),
+    onBeforeClick: () => context.audio.sfx.play('button-cancel'),
     }),
   );
 

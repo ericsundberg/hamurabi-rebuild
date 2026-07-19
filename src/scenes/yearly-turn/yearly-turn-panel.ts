@@ -34,7 +34,7 @@ export function makeYearlyTurnPanel(
     }),
     makeYearlyCommandForm(context),
     makeButton('Back to Title', () => context.navigate('title'), 'secondary-button', {
-      onBeforeClick: () => context.audio.sfx.play('button-click'),
+    onBeforeClick: () => context.audio.sfx.play('button-cancel'),
     }),
   );
 

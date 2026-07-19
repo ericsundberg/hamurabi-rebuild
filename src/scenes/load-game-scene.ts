@@ -40,7 +40,9 @@ export function renderLoadGameScene(context: SceneContext): HTMLElement {
     title,
     description,
     input,
-    makeButton('Back', () => context.navigate('title'), 'secondary-button'),
+    makeButton('Back', () => context.navigate('title'), 'secondary-button', {
+      onBeforeClick: () => context.audio.sfx.play('button-cancel'),
+    }),
   );
 
   scene.append(panel);

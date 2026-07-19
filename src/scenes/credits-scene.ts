@@ -23,7 +23,9 @@ export function renderCreditsScene(context: SceneContext): HTMLElement {
   panel.append(
     title,
     description,
-    makeButton('Back', () => context.navigate('title'), 'secondary-button'),
+    makeButton('Back', () => context.navigate('title'), 'secondary-button', {
+      onBeforeClick: () => context.audio.sfx.play('button-cancel'),
+    }),
   );
 
   scene.append(panel);

@@ -9,6 +9,14 @@ export const sfxManifest = {
     allowOverlap: true,
   },
 
+  'button-cancel': {
+    id: 'button-cancel',
+    label: 'Button Cancel',
+    path: '/assets/audio/sfx/button-cancel.ogg',
+    volume: 0.8,
+    allowOverlap: true,
+  },
+
   disaster: {
     id: 'disaster',
     label: 'Disaster',

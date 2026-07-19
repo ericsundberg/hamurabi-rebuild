@@ -41,14 +41,17 @@ export function renderSettingsScene(context: SceneContext): HTMLElement {
 
   controls.append(
     makeButton('Decrease Scale', () => {
+      context.audio.sfx.play('button-click');
       decreaseUiScale();
       refreshScaleStatus();
     }),
     makeButton('Increase Scale', () => {
+      context.audio.sfx.play('button-click');
       increaseUiScale();
       refreshScaleStatus();
     }),
     makeButton('Reset Scale', () => {
+      context.audio.sfx.play('button-click');
       resetUiScale();
       refreshScaleStatus();
     }),
@@ -59,7 +62,9 @@ export function renderSettingsScene(context: SceneContext): HTMLElement {
     description,
     scaleStatus,
     controls,
-    makeButton('Back', () => context.navigate('title'), 'secondary-button'),
+    makeButton('Back', () => context.navigate('title'), 'secondary-button', {
+      onBeforeClick: () => context.audio.sfx.play('button-cancel'),
+    }),
   );
 
   scene.append(panel);

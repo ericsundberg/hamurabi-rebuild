@@ -46,9 +46,10 @@ describe('audio manifests', () => {
     }
   });
 
-  it('points implemented title sfx entries to existing public assets', () => {
+  it('points implemented interface sfx entries to existing public assets', () => {
     const implementedSfxEntries = [
       sfxManifest['button-click'],
+      sfxManifest['button-cancel'],
     ];
 
     for (const entry of implementedSfxEntries) {

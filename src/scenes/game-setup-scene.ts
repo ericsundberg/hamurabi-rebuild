@@ -60,7 +60,7 @@ export function renderGameSetupScene(context: SceneContext): HTMLElement {
     description,
     form,
     makeButton('Back', () => context.navigate('title'), 'secondary-button', {
-      onBeforeClick: () => context.audio.sfx.play('button-click'),
+    onBeforeClick: () => context.audio.sfx.play('button-cancel'),
     }),
   );
 
