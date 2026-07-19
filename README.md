@@ -6,7 +6,7 @@ This project begins as a headless simulation with an HTML/CSS/DOM interface laye
 
 ## Version
 
-Current version: `0.0.1-prealpha`
+Current version: `0.0.4-prealpha`
 
 ## Project Goals
 
