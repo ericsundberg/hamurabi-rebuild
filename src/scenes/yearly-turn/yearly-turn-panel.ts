@@ -4,6 +4,7 @@ import { makeButton, makeElement } from '../../ui/dom-helpers';
 import { makeAnnualReportList } from './annual-report-list';
 import { makeRecentEventsList } from './recent-events-list';
 import { makeYearlyCommandForm } from './yearly-command-form';
+import { makeRulerStatsLine } from './ruler-stats-line';
 
 export function makeYearlyTurnPanel(
   context: SceneContext,
@@ -17,10 +18,7 @@ export function makeYearlyTurnPanel(
     makeElement('h1', {
       textContent: `Year ${state.year} Court`,
     }),
-    makeElement('p', {
-      className: 'scene-description',
-      textContent: `Ruler: ${state.playerName}`,
-    }),
+    makeRulerStatsLine(context, state),
     makeElement('h2', {
       textContent: 'Annual Report',
     }),

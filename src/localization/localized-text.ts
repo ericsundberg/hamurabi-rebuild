@@ -14,6 +14,10 @@ export const defaultLocalizedText = {
   'gameSetup.startGameButton': 'Start Game',
   'gameSetup.backButton': 'Back',
   'gameSetup.startYearNote': 'The game begins in Year 1 of the dynasty.',
+  'rulerStats.rulerLabel': 'Ruler',
+  'rulerStats.ageLabel': 'Age',
+  'rulerStats.genderLabel': 'Gender',
+  'rulerStats.unknownValue': 'Unknown',
 } as const;
 
 export type LocalizedTextKey = keyof typeof defaultLocalizedText;
