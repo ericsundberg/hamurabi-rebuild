@@ -37,11 +37,11 @@ describe('ruler profile', () => {
   it('formats the display name', () => {
     const rulerProfile = createRulerProfile({
       givenName: 'Ashurbanipal',
-      familyName: 'Sagonid',
+      familyName: 'Sargonid',
       startingAge: 31,
       gender: 'man',
     });
 
-    expect(formatRulerName(rulerProfile)).toBe('Ada Stone');
+    expect(formatRulerName(rulerProfile)).toBe('Ashurbanipal Sargonid');
   });
 });
