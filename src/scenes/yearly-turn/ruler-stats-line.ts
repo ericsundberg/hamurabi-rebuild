@@ -1,8 +1,6 @@
 import type { GameState } from '../../core/types';
 import {
-  formatRulerName,
   type RulerGender,
-  type RulerProfile,
 } from '../../game/ruler-profile';
 import { text, type LocalizedTextKey } from '../../localization/localized-text';
 import { makeElement } from '../../ui/dom-helpers';
@@ -19,15 +17,18 @@ export function makeRulerStatsLine(
   context: SceneContext,
   state: GameState,
 ): HTMLElement {
-  const rulerProfile = context.game.getRulerProfile();
+  const rulerName = context.game.getCurrentRulerName() ?? state.playerName;
   const rulerAge = context.game.getRulerAge();
+  const rulerHealth = context.game.getRulerHealth();
+  const rulerProfile = context.game.getRulerProfile();
 
   return makeElement('p', {
     className: 'scene-description',
     textContent: formatRulerStatsText({
-      rulerName: getRulerName(rulerProfile, state),
+      rulerName,
       age: rulerAge,
       gender: rulerProfile?.gender ?? null,
+      health: rulerHealth,
     }),
   });
 }
@@ -36,6 +37,7 @@ interface RulerStatsTextInput {
   readonly rulerName: string;
   readonly age: number | null;
   readonly gender: RulerGender | null;
+  readonly health: number | null;
 }
 
 function formatRulerStatsText(input: RulerStatsTextInput): string {
@@ -43,17 +45,7 @@ function formatRulerStatsText(input: RulerStatsTextInput): string {
   const genderText = input.gender
     ? text(genderTextKeys[input.gender])
     : text('rulerStats.unknownValue');
+  const healthText = input.health?.toString() ?? text('rulerStats.unknownValue');
 
-  return `${text('rulerStats.rulerLabel')}: ${input.rulerName} | ${text('rulerStats.ageLabel')}: ${ageText} | ${text('rulerStats.genderLabel')}: ${genderText}`;
-}
-
-function getRulerName(
-  rulerProfile: RulerProfile | null,
-  state: GameState,
-): string {
-  if (!rulerProfile) {
-    return state.playerName;
-  }
-
-  return formatRulerName(rulerProfile);
+  return `${text('rulerStats.rulerLabel')}: ${input.rulerName} | ${text('rulerStats.ageLabel')}: ${ageText} | ${text('rulerStats.genderLabel')}: ${genderText} | ${text('rulerStats.healthLabel')}: ${healthText}`;
 }

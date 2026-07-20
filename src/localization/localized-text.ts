@@ -1,4 +1,5 @@
 export const defaultLocalizedText = {
+  'characterDefaults.heirGivenName': 'Heir',
   'gameSetup.title': 'Create Ruler',
   'gameSetup.description': 'Create your ruler before beginning your first year in court.',
   'gameSetup.givenNameLabel': 'Given name',
@@ -17,7 +18,10 @@ export const defaultLocalizedText = {
   'rulerStats.rulerLabel': 'Ruler',
   'rulerStats.ageLabel': 'Age',
   'rulerStats.genderLabel': 'Gender',
+  'rulerStats.healthLabel': 'Health',
   'rulerStats.unknownValue': 'Unknown',
+  'yearlyTurn.yearLabel': 'Year',
+  'yearlyTurn.inReignOf': 'in the reign of',
 } as const;
 
 export type LocalizedTextKey = keyof typeof defaultLocalizedText;

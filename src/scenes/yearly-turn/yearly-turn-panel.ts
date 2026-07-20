@@ -3,8 +3,9 @@ import type { GameState } from '../../core/types';
 import { makeButton, makeElement } from '../../ui/dom-helpers';
 import { makeAnnualReportList } from './annual-report-list';
 import { makeRecentEventsList } from './recent-events-list';
-import { makeYearlyCommandForm } from './yearly-command-form';
+import { makeReignTitle } from './reign-title';
 import { makeRulerStatsLine } from './ruler-stats-line';
+import { makeYearlyCommandForm } from './yearly-command-form';
 
 export function makeYearlyTurnPanel(
   context: SceneContext,
@@ -15,9 +16,7 @@ export function makeYearlyTurnPanel(
   });
 
   panel.append(
-    makeElement('h1', {
-      textContent: `Year ${state.year} Court`,
-    }),
+    makeReignTitle(context, state),
     makeRulerStatsLine(context, state),
     makeElement('h2', {
       textContent: 'Annual Report',
@@ -27,12 +26,9 @@ export function makeYearlyTurnPanel(
       textContent: 'Recent Events',
     }),
     makeRecentEventsList(context.game.getLastOutcome()),
-    makeElement('h2', {
-      textContent: 'Issue Commands',
-    }),
     makeYearlyCommandForm(context),
     makeButton('Back to Title', () => context.navigate('title'), 'secondary-button', {
-    onBeforeClick: () => context.audio.sfx.play('button-cancel'),
+      onBeforeClick: () => context.audio.sfx.play('button-cancel'),
     }),
   );
 
