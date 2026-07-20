@@ -4,6 +4,7 @@ export const gameStartYear = 1;
 
 export interface AgeTrackedEntity {
   readonly startingAge: number;
+  readonly startingYear?: number;
 }
 
 export interface ReignTrackedEntity {
@@ -14,7 +15,9 @@ export function getCurrentAge(
   entity: AgeTrackedEntity,
   state: GameState,
 ): number {
-  return entity.startingAge + Math.max(0, state.year - gameStartYear);
+  const startingYear = entity.startingYear ?? gameStartYear;
+
+  return entity.startingAge + Math.max(0, state.year - startingYear);
 }
 
 export function getCurrentRulerAge(

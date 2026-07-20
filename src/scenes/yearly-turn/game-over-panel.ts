@@ -37,16 +37,19 @@ export function makeGameOverPanel(
     makeElement('h2', {
       textContent: 'Final Report',
     }),
-    makeAnnualReportList(context.game.getAnnualReport()),
+    makeAnnualReportList(
+      context.game.getAnnualReport(),
+      context.game.getCurrentRulerName(),
+    ),
     makeElement('h2', {
       textContent: 'Final Events',
     }),
     makeRecentEventsList(context.game.getLastOutcome()),
     makeButton('Start New Game', () => context.navigate('game-setup'), 'menu-button', {
-    onBeforeClick: () => context.audio.sfx.play('button-click'),
+      onBeforeClick: () => context.audio.sfx.play('button-click'),
     }),
     makeButton('Back to Title', () => context.navigate('title'), 'secondary-button', {
-    onBeforeClick: () => context.audio.sfx.play('button-cancel'),
+      onBeforeClick: () => context.audio.sfx.play('button-cancel'),
     }),
   );
 

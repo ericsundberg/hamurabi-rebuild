@@ -1,4 +1,9 @@
 import {
+  calculateBaseCharacterHealth,
+  roundHealth,
+} from './character-health';
+import { gameStartYear } from './game-calendar';
+import {
   createRulerProfile,
   defaultRulerProfile,
   type RulerCreationInput,
@@ -13,20 +18,30 @@ export interface GameCharacter {
   readonly givenName: string;
   readonly familyName: string;
   readonly startingAge: number;
+  readonly startingYear: number;
   readonly gender: RulerGender;
   readonly health: number;
   readonly isRuler: boolean;
   readonly reignStartYear: number | null;
+  readonly motherId: CharacterId | null;
+  readonly fatherId: CharacterId | null;
+  readonly bornToCharacterId: CharacterId | null;
+  readonly birthOrder: number;
 }
 
 export interface GameCharacterCreationInput extends RulerCreationInput {
   readonly id: CharacterId;
+  readonly startingYear: number;
   readonly health: number;
   readonly isRuler: boolean;
   readonly reignStartYear: number | null;
+  readonly motherId: CharacterId | null;
+  readonly fatherId: CharacterId | null;
+  readonly bornToCharacterId: CharacterId | null;
+  readonly birthOrder: number;
 }
 
-export const defaultCharacterHealth = 100;
+export const defaultCharacterHealth = calculateBaseCharacterHealth(25);
 export const startingRulerCharacterId = 'character-ruler';
 export const startingHeirCharacterId = 'character-heir';
 
@@ -34,16 +49,24 @@ export function createGameCharacter(
   input: Partial<GameCharacterCreationInput> & Pick<GameCharacterCreationInput, 'id'>,
 ): GameCharacter {
   const profile = createRulerProfile(input);
+  const startingAge = normalizeCharacterStartingAge(input.startingAge);
 
   return {
     id: input.id,
     givenName: profile.givenName,
     familyName: profile.familyName,
-    startingAge: normalizeCharacterStartingAge(input.startingAge),
+    startingAge,
+    startingYear: normalizeCharacterStartingYear(input.startingYear),
     gender: profile.gender,
-    health: normalizeHealth(input.health),
+    health: normalizeHealth(
+      input.health ?? calculateBaseCharacterHealth(startingAge),
+    ),
     isRuler: input.isRuler ?? false,
     reignStartYear: input.reignStartYear ?? null,
+    motherId: input.motherId ?? null,
+    fatherId: input.fatherId ?? null,
+    bornToCharacterId: input.bornToCharacterId ?? null,
+    birthOrder: normalizeBirthOrder(input.birthOrder),
   };
 }
 
@@ -56,10 +79,14 @@ export function createStartingRulerCharacter(
     givenName: rulerProfile.givenName,
     familyName: rulerProfile.familyName,
     startingAge: rulerProfile.startingAge,
+    startingYear: gameStartYear,
     gender: rulerProfile.gender,
-    health: defaultCharacterHealth,
     isRuler: true,
     reignStartYear,
+    motherId: null,
+    fatherId: null,
+    bornToCharacterId: null,
+    birthOrder: 0,
   });
 }
 
@@ -72,10 +99,14 @@ export function createStartingHeirCharacter(
     givenName,
     familyName,
     startingAge: 0,
+    startingYear: gameStartYear,
     gender: 'unspecified',
-    health: defaultCharacterHealth,
     isRuler: false,
     reignStartYear: null,
+    motherId: null,
+    fatherId: null,
+    bornToCharacterId: startingRulerCharacterId,
+    birthOrder: 1,
   });
 }
 
@@ -128,10 +159,26 @@ function normalizeCharacterStartingAge(value: number | undefined): number {
   return Math.min(99, Math.max(0, wholeAge));
 }
 
-function normalizeHealth(value: number | undefined): number {
+function normalizeCharacterStartingYear(value: number | undefined): number {
   if (value === undefined || !Number.isFinite(value)) {
-    return defaultCharacterHealth;
+    return gameStartYear;
   }
 
-  return Math.floor(value);
+  return Math.max(gameStartYear, Math.floor(value));
+}
+
+function normalizeBirthOrder(value: number | undefined): number {
+  if (value === undefined || !Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.floor(value));
+}
+
+function normalizeHealth(value: number | undefined): number {
+  if (value === undefined || !Number.isFinite(value)) {
+    return calculateBaseCharacterHealth(defaultRulerProfile.startingAge);
+  }
+
+  return roundHealth(value);
 }

@@ -1,4 +1,5 @@
 export const defaultLocalizedText = {
+  'characterDefaults.childGivenName': 'Child',
   'characterDefaults.heirGivenName': 'Heir',
   'gameSetup.title': 'Create Ruler',
   'gameSetup.description': 'Create your ruler before beginning your first year in court.',

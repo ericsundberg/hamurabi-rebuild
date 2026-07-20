@@ -21,7 +21,10 @@ export function makeYearlyTurnPanel(
     makeElement('h2', {
       textContent: 'Annual Report',
     }),
-    makeAnnualReportList(context.game.getAnnualReport()),
+    makeAnnualReportList(
+      context.game.getAnnualReport(),
+      context.game.getCurrentRulerName(),
+    ),
     makeElement('h2', {
       textContent: 'Recent Events',
     }),

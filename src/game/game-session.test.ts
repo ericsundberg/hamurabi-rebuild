@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  calculateBaseCharacterHealth,
+  childCharacterHealth,
+  primeCharacterHealth,
+} from './character-health';
+import {
   defaultCharacterHealth,
   startingHeirCharacterId,
   startingRulerCharacterId,
@@ -28,7 +33,7 @@ describe('GameSession', () => {
     expect(session.getGameStartYear()).toBe(1);
   });
 
-  it('starts a new game with a normalized ruler and generated heir', () => {
+  it('starts a new game with a normalized ruler and generated child heir', () => {
     const session = createGameSession();
 
     session.startNewGame({
@@ -47,20 +52,30 @@ describe('GameSession', () => {
       givenName: 'Ashurbanipal',
       familyName: 'Sargonid',
       startingAge: 31,
+      startingYear: 1,
       gender: 'man',
-      health: defaultCharacterHealth,
+      health: calculateBaseCharacterHealth(31),
       isRuler: true,
       reignStartYear: 1,
+      motherId: null,
+      fatherId: null,
+      bornToCharacterId: null,
+      birthOrder: 0,
     });
     expect(session.getHeir()).toEqual({
       id: startingHeirCharacterId,
-      givenName: 'Heir',
+      givenName: 'Child',
       familyName: 'Sargonid',
       startingAge: 0,
+      startingYear: 1,
       gender: 'unspecified',
-      health: defaultCharacterHealth,
+      health: childCharacterHealth,
       isRuler: false,
       reignStartYear: null,
+      motherId: null,
+      fatherId: startingRulerCharacterId,
+      bornToCharacterId: startingRulerCharacterId,
+      birthOrder: 1,
     });
     expect(session.getCharacters()).toHaveLength(2);
     expect(session.getRulerProfile()).toEqual({
@@ -70,9 +85,83 @@ describe('GameSession', () => {
       gender: 'man',
     });
     expect(session.getRulerAge()).toBe(31);
-    expect(session.getRulerHealth()).toBe(100);
+    expect(session.getRulerHealth()).toBe(calculateBaseCharacterHealth(31));
     expect(session.getRulerReignYear()).toBe(1);
     expect(session.getAnnualReport()?.year).toBe(1);
+  });
+
+  it('can add multiple children to the current ruler', () => {
+    const session = createGameSession();
+
+    session.startNewGame({
+      givenName: 'Ruler',
+      familyName: 'House',
+      startingAge: 30,
+      gender: 'woman',
+    });
+
+    const firstChild = session.addChildToCurrentRuler({
+      givenName: 'Older Daughter',
+      gender: 'woman',
+    });
+    const secondChild = session.addChildToCurrentRuler({
+      givenName: 'Younger Son',
+      gender: 'man',
+    });
+
+    expect(firstChild?.motherId).toBe(startingRulerCharacterId);
+    expect(firstChild?.fatherId).toBeNull();
+    expect(firstChild?.birthOrder).toBe(2);
+    expect(secondChild?.motherId).toBe(startingRulerCharacterId);
+    expect(secondChild?.gender).toBe('man');
+    expect(secondChild?.birthOrder).toBe(3);
+    expect(session.getCharacters()).toHaveLength(4);
+  });
+
+  it('selects the oldest living male heir before women and others', () => {
+    const session = createGameSession(() => 1);
+
+    session.startNewGame({
+      givenName: 'Ruler',
+      familyName: 'House',
+      startingAge: 30,
+      gender: 'woman',
+    });
+
+    session.addChildToCurrentRuler({
+      givenName: 'Older Daughter',
+      gender: 'woman',
+    });
+    session.addChildToCurrentRuler({
+      givenName: 'Younger Son',
+      gender: 'man',
+    });
+
+    session.damageCurrentRulerHealth(6);
+
+    expect(session.getCurrentRulerName()).toBe('Younger Son House');
+    expect(session.getCurrentRuler()?.gender).toBe('man');
+  });
+
+  it('uses women before unspecified heirs when no male heir lives', () => {
+    const session = createGameSession(() => 1);
+
+    session.startNewGame({
+      givenName: 'Ruler',
+      familyName: 'House',
+      startingAge: 30,
+      gender: 'woman',
+    });
+
+    session.addChildToCurrentRuler({
+      givenName: 'Daughter',
+      gender: 'woman',
+    });
+
+    session.damageCurrentRulerHealth(6);
+
+    expect(session.getCurrentRulerName()).toBe('Daughter House');
+    expect(session.getCurrentRuler()?.gender).toBe('woman');
   });
 
   it('keeps string startNewGame compatibility for simple callers', () => {
@@ -90,7 +179,7 @@ describe('GameSession', () => {
     });
     expect(session.getCurrentRulerName()).toBe('Tester House');
     expect(session.getRulerAge()).toBe(25);
-    expect(session.getRulerHealth()).toBe(100);
+    expect(session.getRulerHealth()).toBe(primeCharacterHealth);
     expect(session.getRulerReignYear()).toBe(1);
   });
 
@@ -104,6 +193,7 @@ describe('GameSession', () => {
       gender: 'unspecified',
     });
 
+    expect(defaultCharacterHealth).toBe(primeCharacterHealth);
     expect(session.getSuggestedTurnCommand()).toEqual({
       acresToBuy: 0,
       acresToSell: 0,
@@ -113,7 +203,7 @@ describe('GameSession', () => {
   });
 
   it('processes a turn and advances ruler age and reign year', () => {
-    const session = createGameSession();
+    const session = createGameSession(() => 1);
 
     session.startNewGame({
       givenName: 'Tester',
@@ -135,6 +225,49 @@ describe('GameSession', () => {
     expect(session.getStatus()).toBe('active');
     expect(session.getRulerAge()).toBe(26);
     expect(session.getRulerReignYear()).toBe(2);
+    expect(session.getRulerHealth()).toBe(5);
+  });
+
+  it('can apply natural health decline when the annual roll succeeds', () => {
+    const session = createGameSession(() => 0);
+
+    session.startNewGame({
+      givenName: 'Tester',
+      familyName: 'House',
+      startingAge: 25,
+      gender: 'unspecified',
+    });
+
+    session.processTurn({
+      acresToBuy: 0,
+      acresToSell: 0,
+      grainToFeed: 2000,
+      acresToPlant: 500,
+    });
+
+    expect(session.getRulerAge()).toBe(26);
+    expect(session.getRulerHealth()).toBe(4.9);
+  });
+
+  it('does not apply natural health decline when the annual roll fails', () => {
+    const session = createGameSession(() => 0.99);
+
+    session.startNewGame({
+      givenName: 'Tester',
+      familyName: 'House',
+      startingAge: 25,
+      gender: 'unspecified',
+    });
+
+    session.processTurn({
+      acresToBuy: 0,
+      acresToSell: 0,
+      grainToFeed: 2000,
+      acresToPlant: 500,
+    });
+
+    expect(session.getRulerAge()).toBe(26);
+    expect(session.getRulerHealth()).toBe(5);
   });
 
   it('does not trigger succession when ruler health is exactly zero', () => {
@@ -147,15 +280,15 @@ describe('GameSession', () => {
       gender: 'unspecified',
     });
 
-    session.damageCurrentRulerHealth(100);
+    session.damageCurrentRulerHealth(5);
 
     expect(session.getCurrentRuler()?.id).toBe(startingRulerCharacterId);
     expect(session.getCurrentRuler()?.health).toBe(0);
     expect(session.getHeir()?.id).toBe(startingHeirCharacterId);
   });
 
-  it('transfers rulership to the heir when ruler health falls below zero', () => {
-    const session = createGameSession();
+  it('transfers rulership and creates a new child for the new ruler', () => {
+    const session = createGameSession(() => 1);
 
     session.startNewGame({
       givenName: 'Ashurbanipal',
@@ -171,32 +304,75 @@ describe('GameSession', () => {
       acresToPlant: 500,
     });
 
-    session.damageCurrentRulerHealth(101);
+    session.damageCurrentRulerHealth(6);
 
-    expect(session.getCurrentRuler()).toEqual({
+    expect(session.getCurrentRuler()).toMatchObject({
       id: startingHeirCharacterId,
-      givenName: 'Heir',
+      givenName: 'Child',
       familyName: 'Sargonid',
-      startingAge: 0,
-      gender: 'unspecified',
-      health: 100,
       isRuler: true,
       reignStartYear: 2,
     });
-    expect(session.getHeir()).toBeNull();
-    expect(session.getRulerAge()).toBe(1);
-    expect(session.getRulerHealth()).toBe(100);
-    expect(session.getRulerReignYear()).toBe(1);
-    expect(session.getCharacters()).toContainEqual({
-      id: startingRulerCharacterId,
-      givenName: 'Ashurbanipal',
+    expect(session.getHeir()).toMatchObject({
+      id: 'character-child-2',
+      givenName: 'Child',
       familyName: 'Sargonid',
-      startingAge: 31,
-      gender: 'man',
-      health: -1,
+      startingAge: 0,
+      startingYear: 2,
+      health: childCharacterHealth,
       isRuler: false,
-      reignStartYear: 1,
+      reignStartYear: null,
     });
+    expect(session.getRulerAge()).toBe(1);
+    expect(session.getRulerHealth()).toBe(childCharacterHealth);
+    expect(session.getRulerReignYear()).toBe(1);
+  });
+
+  it('does not trigger natural succession when ruler health reaches exactly zero at age 85', () => {
+    const session = createGameSession(() => 0.99);
+
+    session.startNewGame({
+      givenName: 'Elder',
+      familyName: 'House',
+      startingAge: 84,
+      gender: 'unspecified',
+    });
+
+    session.processTurn({
+      acresToBuy: 0,
+      acresToSell: 0,
+      grainToFeed: 2000,
+      acresToPlant: 500,
+    });
+
+    expect(session.getCurrentRuler()?.id).toBe(startingRulerCharacterId);
+    expect(session.getRulerAge()).toBe(85);
+    expect(session.getRulerHealth()).toBe(0);
+    expect(session.getRulerReignYear()).toBe(2);
+  });
+
+  it('transfers rulership through natural aging after age 85', () => {
+    const session = createGameSession(() => 0.99);
+
+    session.startNewGame({
+      givenName: 'Elder',
+      familyName: 'House',
+      startingAge: 85,
+      gender: 'unspecified',
+    });
+
+    session.processTurn({
+      acresToBuy: 0,
+      acresToSell: 0,
+      grainToFeed: 2000,
+      acresToPlant: 500,
+    });
+
+    expect(session.getCurrentRuler()?.id).toBe(startingHeirCharacterId);
+    expect(session.getCurrentRulerName()).toBe('Child House');
+    expect(session.getRulerAge()).toBe(1);
+    expect(session.getRulerHealth()).toBe(childCharacterHealth);
+    expect(session.getRulerReignYear()).toBe(1);
   });
 
   it('ends the game when population reaches zero', () => {
